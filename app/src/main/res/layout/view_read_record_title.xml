@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tv_read_record_title"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:theme="?attr/actionBarStyle"
+    android:gravity="center_vertical"
+    android:includeFontPadding="false"
+    android:paddingStart="28dp"
+    android:paddingEnd="28dp"
+    android:singleLine="true"
+    android:text="@string/read_record"
+    android:textAppearance="@style/ToolbarTitle"
+    android:textColor="@color/primaryText" />

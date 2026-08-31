@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingLeft="14dp"
+    android:paddingTop="14dp"
+    android:paddingRight="14dp"
+    android:paddingBottom="6dp">
+
+    <TextView
+        android:id="@+id/tv_book_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:textColor="@color/primaryText"
+        android:textSize="16sp"
+        tools:text="凡人修仙传 · 旧记录" />
+
+    <TextView
+        android:id="@+id/tv_reading_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:singleLine="true"
+        android:textColor="@color/secondaryText"
+        android:textSize="13sp"
+        tools:text="旧阅读时长：100小时" />
+
+</LinearLayout>

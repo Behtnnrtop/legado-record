@@ -1,0 +1,77 @@
+# IDE / editor
+.idea/
+.vscode/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local SDK / machine config
+local.properties
+/app/gradle.properties
+
+# Gradle / Kotlin cache
+.gradle/
+.gradle-user-home/
+.gradle-user-home2/
+.kotlin/
+
+# Android build outputs
+build/
+*/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+/release/
+/tmp/
+.tmp-*
+*.apk
+*.aab
+*.ap_
+
+# Android signing / release secrets
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+
+# Firebase / Google service config
+app/google-services*.json
+!app/google-services.example.json
+
+# Generated app folders from legacy scripts
+/app/app/
+/app/google/
+
+# Node / Web
+logs/
+*.log
+node_modules/
+dist/
+dist-ssr/
+coverage/
+.vite/
+*.local
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+package-lock.json
+
+# Cypress artifacts
+cypress/videos/
+cypress/screenshots/
+
+# Visual Studio / temporary editor files
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+doc/
+agents.md
