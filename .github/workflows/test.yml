@@ -170,7 +170,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: Build With Gradle
-        continue-on-error: true
         run: |
           if [ "${{ env.type }}" == 'release' ]; then
             typeName="原包名"
