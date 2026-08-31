@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="阅读record outline app icon">
+  <rect width="1024" height="1024" rx="220" fill="#E7F6FF"/>
+  <path
+    d="M236 286c0-28 22-50 50-50h132c82 0 148 66 148 148v376c0 18-22 27-35 14l-10-10c-42-42-99-66-159-66h-76c-28 0-50-22-50-50V286z"
+    fill="none"
+    stroke="#1E88E5"
+    stroke-width="42"
+    stroke-linejoin="round"/>
+  <path
+    d="M788 286c0-28-22-50-50-50H606c-82 0-148 66-148 148v376c0 18 22 27 35 14l10-10c42-42 99-66 159-66h76c28 0 50-22 50-50V286z"
+    fill="none"
+    stroke="#1E88E5"
+    stroke-width="42"
+    stroke-linejoin="round"/>
+  <path d="M512 382v390" stroke="#8ED2F6" stroke-width="28" stroke-linecap="round"/>
+  <path d="M344 426h112" stroke="#8ED2F6" stroke-width="34" stroke-linecap="round"/>
+  <path d="M344 526h132" stroke="#8ED2F6" stroke-width="34" stroke-linecap="round"/>
+  <path d="M344 626h104" stroke="#8ED2F6" stroke-width="34" stroke-linecap="round"/>
+  <path d="M626 562v98" stroke="#1E88E5" stroke-width="42" stroke-linecap="round"/>
+  <path d="M704 502v218" stroke="#1E88E5" stroke-width="42" stroke-linecap="round"/>
+  <path d="M782 562v98" stroke="#1E88E5" stroke-width="42" stroke-linecap="round"/>
+  <circle cx="742" cy="392" r="42" fill="none" stroke="#FF5A52" stroke-width="34"/>
+</svg>
