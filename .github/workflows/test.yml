@@ -295,6 +295,8 @@ jobs:
     needs: [ prepare, build ]
     if: github.event_name != 'pull_request' && github.repository == 'Behtnnrtop/legado-record'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       VERSION: ${{ needs.prepare.outputs.version }}
     steps:
@@ -342,11 +344,9 @@ jobs:
 
       - name: Create or update beta tag
         if: needs.prepare.outputs.updateLog_updated != 'yes'
-        uses: richardsimko/update-tag@v1
-        with:
-          tag_name: beta
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git tag -f beta
+          git push --force origin refs/tags/beta
 
       - name: Publish Pre-Release
         if: needs.prepare.outputs.updateLog_updated != 'yes'
