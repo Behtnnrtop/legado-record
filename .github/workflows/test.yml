@@ -166,6 +166,58 @@ jobs:
         run: |
           echo "清空18PlusList.txt"
           echo "">$GITHUB_WORKSPACE/app/src/main/assets/18PlusList.txt
+      - name: Create Google Services Config
+        run: |
+          cat > $GITHUB_WORKSPACE/app/google-services.json << 'EOF'
+          {
+            "project_info": {
+              "project_number": "000000000000",
+              "project_id": "legado-record-ci",
+              "storage_bucket": "legado-record-ci.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+                  "android_client_info": {
+                    "package_name": "io.legado.app.releaseR"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "ci-placeholder-key"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              },
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:1111111111111111111111",
+                  "android_client_info": {
+                    "package_name": "io.legado.app.releaseS"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "ci-placeholder-key"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
 
