@@ -79,6 +79,9 @@
     <string name="read_record_hour_histogram_y_axis">次数</string>
     <string name="read_record_hour_histogram_empty">本周暂无阅读数据</string>
     <string name="rating_overview">评分总览</string>
+    <string name="book_review_overview">书评总览</string>
+    <string name="book_review_detail">书评详情</string>
+    <string name="book_reviews_empty">暂无书评</string>
     <string name="rating_books_empty">暂无该评分书籍</string>
     <string name="last_read">最后阅读</string>
     <string name="update_log">更新日志</string>
@@ -994,6 +997,13 @@
     <string name="book_rating_score">%1$.1f</string>
     <string name="book_rating_updated">已评分 %1$.1f 分</string>
     <string name="book_rating_cleared">已清除评分</string>
+    <string name="book_review">书评</string>
+    <string name="book_review_title">书评：</string>
+    <string name="book_review_edit">编辑书评</string>
+    <string name="book_review_empty">暂无书评</string>
+    <string name="book_review_created">创建于 %1$s</string>
+    <string name="add_book_review">添加评价</string>
+    <string name="book_review_page_tip">已到书末</string>
     <string name="read_data">阅读数据：</string>
     <string name="read_duration">阅读时长</string>
     <string name="read_day_count">阅读天数</string>

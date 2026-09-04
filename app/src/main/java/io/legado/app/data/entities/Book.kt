@@ -129,7 +129,15 @@ data class Book(
     var rating: Float = 0f,
     // 用户评分更新时间
     @ColumnInfo(defaultValue = "0")
-    var ratingUpdateTime: Long = 0L
+    var ratingUpdateTime: Long = 0L,
+    // 用户书评
+    var review: String? = null,
+    // 用户书评创建时间
+    @ColumnInfo(defaultValue = "0")
+    var reviewCreateTime: Long = 0L,
+    // 用户书评更新时间
+    @ColumnInfo(defaultValue = "0")
+    var reviewUpdateTime: Long = 0L
 ) : Parcelable, BaseBook {
 
     override fun equals(other: Any?): Boolean {
@@ -423,6 +431,11 @@ data class Book(
         if (ratingUpdateTime > newBook.ratingUpdateTime) {
             newBook.rating = rating
             newBook.ratingUpdateTime = ratingUpdateTime
+        }
+        if (reviewUpdateTime > newBook.reviewUpdateTime) {
+            newBook.review = review
+            newBook.reviewCreateTime = reviewCreateTime
+            newBook.reviewUpdateTime = reviewUpdateTime
         }
         return newBook
     }

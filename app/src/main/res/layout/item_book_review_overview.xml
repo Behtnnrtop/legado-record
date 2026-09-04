@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cv_content"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_item_focused_on_tv"
+    android:clickable="true"
+    android:focusable="true"
+    android:minHeight="132dp"
+    android:paddingLeft="8dp"
+    android:paddingTop="8dp"
+    android:paddingRight="8dp"
+    android:paddingBottom="8dp"
+    tools:ignore="RtlSymmetry">
+
+    <io.legado.app.ui.widget.image.CoverImageView
+        android:id="@+id/iv_cover"
+        android:layout_width="54dp"
+        android:layout_height="72dp"
+        android:contentDescription="@string/img_cover"
+        android:scaleType="centerCrop"
+        android:src="@drawable/image_cover_default"
+        app:layout_constraintBottom_toBottomOf="@id/book_rating_bar"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        android:ellipsize="end"
+        android:includeFontPadding="false"
+        android:singleLine="true"
+        android:textColor="@color/primaryText"
+        android:textSize="16sp"
+        app:layout_constraintLeft_toRightOf="@id/iv_cover"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/iv_cover"
+        tools:text="@string/book_name" />
+
+    <TextView
+        android:id="@+id/tv_author"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:ellipsize="end"
+        android:includeFontPadding="false"
+        android:singleLine="true"
+        android:textColor="@color/tv_text_summary"
+        android:textSize="13sp"
+        app:layout_constraintLeft_toLeftOf="@id/tv_name"
+        app:layout_constraintRight_toRightOf="@id/tv_name"
+        app:layout_constraintTop_toBottomOf="@id/tv_name"
+        tools:text="@string/author" />
+
+    <io.legado.app.ui.widget.BookRatingBar
+        android:id="@+id/book_rating_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginTop="4dp"
+        android:enabled="false"
+        android:scaleX="0.86"
+        android:scaleY="0.86"
+        android:transformPivotX="0dp"
+        android:transformPivotY="30dp"
+        android:translationY="5dp"
+        app:layout_constraintLeft_toLeftOf="@id/tv_name"
+        app:layout_constraintRight_toLeftOf="@id/tv_review_time"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintTop_toBottomOf="@id/tv_author" />
+
+    <TextView
+        android:id="@+id/tv_review_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="end"
+        android:includeFontPadding="false"
+        android:layout_marginLeft="8dp"
+        android:singleLine="true"
+        android:textColor="@color/tv_text_summary"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@id/book_rating_bar"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/book_rating_bar"
+        tools:text="2026-09-04" />
+
+    <TextView
+        android:id="@+id/tv_review"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="13dp"
+        android:breakStrategy="high_quality"
+        android:hyphenationFrequency="none"
+        android:includeFontPadding="false"
+        android:justificationMode="inter_word"
+        android:lineSpacingExtra="2dp"
+        android:maxLines="4"
+        android:textColor="@color/primaryText"
+        android:textSize="14sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/book_rating_bar"
+        tools:text="这是一段书评预览，展示用户为这本书留下的简短评价内容。" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

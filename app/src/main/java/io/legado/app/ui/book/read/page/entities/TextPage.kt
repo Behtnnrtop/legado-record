@@ -1,7 +1,9 @@
 package io.legado.app.ui.book.read.page.entities
 
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.RectF
 import android.os.Build
 import android.text.Layout
 import android.text.StaticLayout
@@ -11,6 +13,7 @@ import io.legado.app.R
 import io.legado.app.help.PaintPool
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.ReadBookConfig
+import io.legado.app.lib.theme.accentColor
 import io.legado.app.ui.book.read.page.ContentTextView
 import io.legado.app.ui.book.read.page.entities.TextChapter.Companion.emptyTextChapter
 import io.legado.app.ui.book.read.page.entities.column.TextBaseColumn
@@ -53,11 +56,13 @@ data class TextPage(
     val chapterPosition: Int get() = textLines.first().chapterPosition
     val searchResult = hashSetOf<TextBaseColumn>()
     var isMsgPage: Boolean = false
+    var isBookReviewPage: Boolean = false
     var canvasRecorder = CanvasRecorderFactory.create(true)
     var doublePage = false
     var paddingTop = ChapterProvider.paddingTop
     var isCompleted = false
     var hasReadAloudSpan = false
+    private val bookReviewButtonRect = RectF()
 
     @JvmField
     var textChapter = emptyTextChapter
@@ -239,6 +244,7 @@ data class TextPage(
      */
     val readProgress: String
         get() {
+            if (isBookReviewPage) return "100.0%"
             val df = readProgressFormatter
             if (chapterSize == 0 || pageSize == 0 && chapterIndex == 0) {
                 return "0.0%"
@@ -299,6 +305,12 @@ data class TextPage(
     }
 
     fun draw(view: ContentTextView, canvas: Canvas, relativeOffset: Float) {
+        if (isBookReviewPage) {
+            canvas.withTranslation(0f, relativeOffset) {
+                drawBookReviewPage(view, this)
+            }
+            return
+        }
         if (AppConfig.optimizeRender) {
             render(view)
             canvas.withTranslation(0f, relativeOffset) {
@@ -335,7 +347,68 @@ data class TextPage(
         }
     }
 
+    private fun drawBookReviewPage(view: ContentTextView, canvas: Canvas) {
+        val buttonText = appCtx.getString(R.string.add_book_review)
+        val tipText = appCtx.getString(R.string.book_review_page_tip)
+        val accentColor = view.context.accentColor
+        val textPaint = PaintPool.obtain()
+        val bgPaint = PaintPool.obtain()
+        val strokePaint = PaintPool.obtain()
+        val tipPaint = PaintPool.obtain()
+        textPaint.isAntiAlias = AppConfig.useAntiAlias
+        textPaint.color = accentColor
+        textPaint.textAlign = Paint.Align.CENTER
+        textPaint.textSize = 15.dpToPx().toFloat()
+        tipPaint.set(ChapterProvider.contentPaint)
+        tipPaint.isAntiAlias = AppConfig.useAntiAlias
+        tipPaint.alpha = 120
+        tipPaint.textAlign = Paint.Align.CENTER
+        tipPaint.textSize = 15.dpToPx().toFloat()
+        bgPaint.isAntiAlias = AppConfig.useAntiAlias
+        bgPaint.color = Color.argb(
+            28,
+            Color.red(accentColor),
+            Color.green(accentColor),
+            Color.blue(accentColor)
+        )
+        bgPaint.style = Paint.Style.FILL
+        strokePaint.isAntiAlias = AppConfig.useAntiAlias
+        strokePaint.color = Color.argb(
+            150,
+            Color.red(accentColor),
+            Color.green(accentColor),
+            Color.blue(accentColor)
+        )
+        strokePaint.style = Paint.Style.STROKE
+        strokePaint.strokeWidth = 1.dpToPx().toFloat()
+        val horizontalPadding = 22.dpToPx()
+        val buttonHeight = 38.dpToPx().toFloat()
+        val buttonWidth = textPaint.measureText(buttonText) + horizontalPadding * 2
+        val left = ChapterProvider.paddingLeft +
+                (ChapterProvider.visibleWidth - buttonWidth) / 2f
+        val top = ChapterProvider.paddingTop +
+                (ChapterProvider.visibleHeight - buttonHeight) / 2f + 22.dpToPx()
+        bookReviewButtonRect.set(left, top, left + buttonWidth, top + buttonHeight)
+        val tipBaseline = top - 18.dpToPx()
+        canvas.drawText(tipText, ChapterProvider.visibleRect.centerX(), tipBaseline, tipPaint)
+        val radius = 6.dpToPx().toFloat()
+        canvas.drawRoundRect(bookReviewButtonRect, radius, radius, bgPaint)
+        canvas.drawRoundRect(bookReviewButtonRect, radius, radius, strokePaint)
+        val fontMetrics = textPaint.fontMetrics
+        val baseline = bookReviewButtonRect.centerY() - (fontMetrics.ascent + fontMetrics.descent) / 2f
+        canvas.drawText(buttonText, bookReviewButtonRect.centerX(), baseline, textPaint)
+        PaintPool.recycle(textPaint)
+        PaintPool.recycle(bgPaint)
+        PaintPool.recycle(strokePaint)
+        PaintPool.recycle(tipPaint)
+    }
+
+    fun isBookReviewButtonTouched(x: Float, y: Float, relativeOffset: Float): Boolean {
+        return isBookReviewPage && bookReviewButtonRect.contains(x, y - relativeOffset)
+    }
+
     fun render(view: ContentTextView): Boolean {
+        if (isBookReviewPage) return false
         if (!isCompleted) return false
         return canvasRecorder.recordIfNeeded(view.width, renderHeight + 10.dpToPx()) { //高度留余，避免图片过高时被截断 下划线最远10dp
             drawPage(view, this)

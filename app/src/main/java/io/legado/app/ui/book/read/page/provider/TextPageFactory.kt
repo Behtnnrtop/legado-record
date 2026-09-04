@@ -10,24 +10,31 @@ import splitties.init.appCtx
 class TextPageFactory(dataSource: DataSource) : PageFactory<TextPage>(dataSource) {
 
     private val keepSwipeTip = appCtx.getString(R.string.keep_swipe_tip)
+    private var showingBookReviewPage = false
 
     override fun hasPrev(): Boolean = with(dataSource) {
-        return hasPrevChapter() || pageIndex > 0
+        return showingBookReviewPage || hasPrevChapter() || pageIndex > 0
     }
 
     override fun hasNext(): Boolean = with(dataSource) {
-        return hasNextChapter() || (currentChapter != null && currentChapter?.isLastIndex(pageIndex) != true)
+        showingBookReviewPage = showingBookReviewPage && canShowBookReviewPage()
+        return !showingBookReviewPage &&
+                (hasNextChapter()
+                        || (currentChapter != null && currentChapter?.isLastIndex(pageIndex) != true)
+                        || canShowBookReviewPage())
     }
 
     override fun hasNextPlus(): Boolean = with(dataSource) {
-        return hasNextChapter() || pageIndex < (currentChapter?.pageSize ?: 1) - 2
+        return !showingBookReviewPage && (hasNextChapter() || pageIndex < (currentChapter?.pageSize ?: 1) - 2)
     }
 
     override fun moveToFirst() {
+        showingBookReviewPage = false
         ReadBook.setPageIndex(0)
     }
 
     override fun moveToLast() = with(dataSource) {
+        showingBookReviewPage = false
         currentChapter?.let {
             if (it.pageSize == 0) {
                 ReadBook.setPageIndex(0)
@@ -41,14 +48,21 @@ class TextPageFactory(dataSource: DataSource) : PageFactory<TextPage>(dataSource
         return if (hasNext()) {
             val pageIndex = pageIndex
             if (currentChapter == null || currentChapter?.isLastIndex(pageIndex) == true) {
+                if (canShowBookReviewPage()) {
+                    showingBookReviewPage = true
+                    if (upContent) upContent(resetPageOffset = false)
+                    return@with true
+                }
                 if ((currentChapter == null || isScroll) && nextChapter == null) {
                     return@with false
                 }
+                showingBookReviewPage = false
                 ReadBook.moveToNextChapter(upContent, false)
             } else {
                 if (pageIndex < 0 || currentChapter?.isLastIndexCurrent(pageIndex) == true) {
                     return@with false
                 }
+                showingBookReviewPage = false
                 ReadBook.setPageIndex(pageIndex.plus(1))
             }
             if (upContent) upContent(resetPageOffset = false)
@@ -59,7 +73,9 @@ class TextPageFactory(dataSource: DataSource) : PageFactory<TextPage>(dataSource
 
     override fun moveToPrev(upContent: Boolean): Boolean = with(dataSource) {
         return if (hasPrev()) {
-            if (pageIndex <= 0) {
+            if (showingBookReviewPage) {
+                showingBookReviewPage = false
+            } else if (pageIndex <= 0) {
                 if (currentChapter == null && prevChapter == null) {
                     return@with false
                 }
@@ -81,6 +97,10 @@ class TextPageFactory(dataSource: DataSource) : PageFactory<TextPage>(dataSource
 
     override val curPage: TextPage
         get() = with(dataSource) {
+            showingBookReviewPage = showingBookReviewPage && canShowBookReviewPage()
+            if (showingBookReviewPage) {
+                return@with bookReviewPage()
+            }
             ReadBook.msg?.let {
                 return@with TextPage(text = it).format()
             }
@@ -93,6 +113,9 @@ class TextPageFactory(dataSource: DataSource) : PageFactory<TextPage>(dataSource
 
     override val nextPage: TextPage
         get() = with(dataSource) {
+            if (!showingBookReviewPage && canShowBookReviewPage()) {
+                return@with bookReviewPage()
+            }
             ReadBook.msg?.let {
                 return@with TextPage(text = it).format()
             }
@@ -115,6 +138,12 @@ class TextPageFactory(dataSource: DataSource) : PageFactory<TextPage>(dataSource
 
     override val prevPage: TextPage
         get() = with(dataSource) {
+            if (showingBookReviewPage) {
+                currentChapter?.let {
+                    return@with it.lastPage?.removePageAloudSpan()
+                        ?: TextPage(title = it.title).format()
+                }
+            }
             ReadBook.msg?.let {
                 return@with TextPage(text = it).format()
             }
@@ -137,6 +166,9 @@ class TextPageFactory(dataSource: DataSource) : PageFactory<TextPage>(dataSource
 
     override val nextPlusPage: TextPage
         get() = with(dataSource) {
+            if (showingBookReviewPage || canShowBookReviewPage()) {
+                return@with TextPage().format()
+            }
             currentChapter?.let {
                 val pageIndex = pageIndex
                 if (pageIndex < it.pageSize - 2) {
@@ -157,4 +189,24 @@ class TextPageFactory(dataSource: DataSource) : PageFactory<TextPage>(dataSource
             }
             return TextPage().format()
         }
+
+    private fun canShowBookReviewPage() = with(dataSource) {
+        currentChapter?.isCompleted == true &&
+                currentChapter?.isLastIndex(pageIndex) == true &&
+                !hasNextChapter() &&
+                ReadBook.msg == null
+    }
+
+    private fun bookReviewPage() = TextPage(
+        text = appCtx.getString(R.string.add_book_review),
+        title = ReadBook.book?.name ?: appCtx.getString(R.string.book_review),
+        chapterSize = ReadBook.simulatedChapterSize,
+        chapterIndex = (ReadBook.simulatedChapterSize - 1).coerceAtLeast(0)
+    ).apply {
+        index = 0
+        isBookReviewPage = true
+        isCompleted = true
+        height = ChapterProvider.visibleHeight.toFloat()
+        renderHeight = height.toInt()
+    }
 }

@@ -15,6 +15,11 @@ import io.legado.app.help.book.isNotShelf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+data class BookRatingCount(
+    val rating: Float,
+    val count: Int
+)
+
 @Dao
 interface BookDao {
 
@@ -53,8 +58,37 @@ interface BookDao {
         }
     }
 
+    fun flowShelfRatedBooks(): Flow<List<Book>> {
+        return flowRatedBooks().map { list ->
+            list.filterNot { it.isNotShelf }
+        }
+    }
+
+    fun flowShelfReviewedBooks(): Flow<List<Book>> {
+        return flowReviewedBooks().map { list ->
+            list.filterNot { it.isNotShelf }
+        }
+    }
+
+    fun flowShelfRatingCounts(): Flow<List<BookRatingCount>> {
+        return flowAll().map { list ->
+            list.filterNot { it.isNotShelf }
+                .groupingBy { it.rating }
+                .eachCount()
+                .map { (rating, count) ->
+                    BookRatingCount(rating, count)
+                }
+        }
+    }
+
     @Query("SELECT * FROM books WHERE rating = :rating ORDER BY durChapterTime DESC")
     fun flowByRating(rating: Float): Flow<List<Book>>
+
+    @Query("SELECT * FROM books WHERE rating > 0 ORDER BY durChapterTime DESC")
+    fun flowRatedBooks(): Flow<List<Book>>
+
+    @Query("SELECT * FROM books WHERE review IS NOT NULL AND trim(review) != '' ORDER BY reviewCreateTime ASC")
+    fun flowReviewedBooks(): Flow<List<Book>>
 
     @Query("SELECT * FROM books WHERE type & ${BookType.audio} > 0")
     fun flowAudio(): Flow<List<Book>>
@@ -178,6 +212,26 @@ interface BookDao {
 
     @Query("update books set rating = :rating, ratingUpdateTime = :updateTime where bookUrl = :bookUrl")
     fun updateRating(bookUrl: String, rating: Float, updateTime: Long)
+
+    @Query(
+        """
+        update books
+        set rating = :rating,
+            ratingUpdateTime = :ratingUpdateTime,
+            review = :review,
+            reviewCreateTime = :reviewCreateTime,
+            reviewUpdateTime = :reviewUpdateTime
+        where bookUrl = :bookUrl
+        """
+    )
+    fun updateReviewAndRating(
+        bookUrl: String,
+        rating: Float,
+        ratingUpdateTime: Long,
+        review: String?,
+        reviewCreateTime: Long,
+        reviewUpdateTime: Long
+    )
 
     @Query("update books set `group` = :newGroupId where `group` = :oldGroupId")
     fun upGroup(oldGroupId: Long, newGroupId: Long)

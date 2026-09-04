@@ -12,17 +12,22 @@ object BookReadRecordMigrationModel {
         if (oldBook.bookUrl.isBlank() || newBook.bookUrl.isBlank()) return
         if (oldBook.bookUrl == newBook.bookUrl) return
         appDb.runInTransaction {
-            migrateRating(oldBook, newBook)
+            migrateReviewMeta(oldBook, newBook)
             migrateReadRecord(oldBook, newBook)
             updateLegacyMappings(oldBook, newBook)
             migrateSessionsAndRebuildDayRecords(oldBook, newBook)
         }
     }
 
-    private fun migrateRating(oldBook: Book, newBook: Book) {
+    private fun migrateReviewMeta(oldBook: Book, newBook: Book) {
         if (oldBook.ratingUpdateTime > newBook.ratingUpdateTime) {
             newBook.rating = oldBook.rating
             newBook.ratingUpdateTime = oldBook.ratingUpdateTime
+        }
+        if (oldBook.reviewUpdateTime > newBook.reviewUpdateTime) {
+            newBook.review = oldBook.review
+            newBook.reviewCreateTime = oldBook.reviewCreateTime
+            newBook.reviewUpdateTime = oldBook.reviewUpdateTime
         }
     }
 

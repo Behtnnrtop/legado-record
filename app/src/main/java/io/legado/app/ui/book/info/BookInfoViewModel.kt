@@ -436,7 +436,7 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
                 book.durChapterIndex = it.durChapterIndex
                 book.durChapterPos = it.durChapterPos
                 book.durChapterTitle = it.durChapterTitle
-                book.mergeRatingFrom(it)
+                book.mergeReviewMetaFrom(it)
             }
             book.save()
             if (ReadBook.book?.isSameNameAuthor(book) == true) {
@@ -495,7 +495,7 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
                     book.durChapterIndex = it.durChapterIndex
                     book.durChapterPos = it.durChapterPos
                     book.durChapterTitle = it.durChapterTitle
-                    book.mergeRatingFrom(it)
+                    book.mergeReviewMetaFrom(it)
                 }
                 if (ReadBook.book?.isSameNameAuthor(book) == true) {
                     ReadBook.book = book
@@ -598,10 +598,15 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
         return (value.coerceIn(0.5f, 5f) * 2).roundToInt() / 2f
     }
 
-    private fun Book.mergeRatingFrom(other: Book) {
+    private fun Book.mergeReviewMetaFrom(other: Book) {
         if (other.ratingUpdateTime > ratingUpdateTime) {
             rating = other.rating
             ratingUpdateTime = other.ratingUpdateTime
+        }
+        if (other.reviewUpdateTime > reviewUpdateTime) {
+            review = other.review
+            reviewCreateTime = other.reviewCreateTime
+            reviewUpdateTime = other.reviewUpdateTime
         }
     }
 

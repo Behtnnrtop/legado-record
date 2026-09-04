@@ -281,6 +281,11 @@ fun Book.updateTo(newBook: Book): Book {
         newBook.rating = rating
         newBook.ratingUpdateTime = ratingUpdateTime
     }
+    if (reviewUpdateTime > newBook.reviewUpdateTime) {
+        newBook.review = review
+        newBook.reviewCreateTime = reviewCreateTime
+        newBook.reviewUpdateTime = reviewUpdateTime
+    }
     val variableMap = variableMap.toMutableMap()
     variableMap.keys.removeIf {
         newBook.hasVariable(it)

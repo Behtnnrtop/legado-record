@@ -58,18 +58,20 @@ class ReadRecordFragment() : BaseFragment(R.layout.fragment_read_record_tabs),
         override fun getPageTitle(position: Int): CharSequence {
             return when (position) {
                 0 -> getString(R.string.read_record)
-                else -> getString(R.string.rating_overview)
+                1 -> getString(R.string.rating_overview)
+                else -> getString(R.string.book_review_overview)
             }
         }
 
         override fun getItem(position: Int): Fragment {
             return when (position) {
                 0 -> ReadRecordOverviewFragment()
-                else -> RatingOverviewFragment()
+                1 -> RatingOverviewFragment()
+                else -> BookReviewOverviewFragment()
             }
         }
 
-        override fun getCount(): Int = 2
+        override fun getCount(): Int = 3
 
     }
 

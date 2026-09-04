@@ -76,6 +76,7 @@ import io.legado.app.ui.book.manga.ReadMangaActivity
 import io.legado.app.ui.book.read.ReadBookActivity
 import io.legado.app.ui.book.read.ReadBookActivity.Companion.RESULT_DELETED
 import io.legado.app.ui.book.search.SearchActivity
+import io.legado.app.ui.book.review.BookReviewEditActivity
 import io.legado.app.model.SourceCallBack
 import io.legado.app.ui.association.OnLineImportActivity
 import io.legado.app.ui.book.source.edit.BookSourceEditActivity
@@ -189,6 +190,13 @@ class BookInfoActivity :
                 viewModel.hasCustomBtn = source.customButton
             }
             viewModel.refreshBook(book)
+        }
+    }
+    private val bookReviewEditResult = registerForActivityResult(
+        StartActivityContract(BookReviewEditActivity::class.java)
+    ) {
+        if (it.resultCode == RESULT_OK) {
+            viewModel.upEditBook()
         }
     }
     private var chapterChanged = false
@@ -496,6 +504,7 @@ class BookInfoActivity :
         tvOrigin.text = getString(R.string.origin_show, book.originName)
         tvLasted.text = getString(R.string.lasted_show, book.latestChapterTitle)
         showBookIntro(book)
+        showBookReview(book)
         bookRatingBar.rating = book.rating
         if (book.isWebFile) {
             llToc.gone()
@@ -509,15 +518,20 @@ class BookInfoActivity :
         upGroup(book.group)
     }
 
+    private fun showBookReview(book: Book) = binding.run {
+        tvBookReview?.text = book.review?.takeIf { it.isNotBlank() }
+            ?: getString(R.string.book_review_empty)
+    }
+
     private fun showReadStats(stats: BookReadStats) = binding.run {
         llReadData?.visible()
         if (stats.totalReadTime <= 0L && !stats.hasDayRecords) {
             tvReadDataEmpty?.visible()
             llReadStatsRow1?.gone()
             llReadStatsRow2?.gone()
-            tvReadCalendarTitle?.gone()
+            tvReadCalendarTitle?.visible()
             hsvReadCalendar?.gone()
-            tvReadCalendarEmpty?.gone()
+            tvReadCalendarEmpty?.visible()
             return@run
         }
 
@@ -859,6 +873,13 @@ class BookInfoActivity :
     private fun initViewEvent() = binding.run {
         bookRatingBar.onRatingChanged = { rating ->
             viewModel.updateRating(rating)
+        }
+        tvBookReviewEdit?.setOnClickListener {
+            viewModel.getBook()?.let { book ->
+                bookReviewEditResult.launch {
+                    putExtra("bookUrl", book.bookUrl)
+                }
+            }
         }
         llIntroFold?.setOnClickListener {
             if (introCanFold) {

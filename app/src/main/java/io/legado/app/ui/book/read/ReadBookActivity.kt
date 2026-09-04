@@ -84,6 +84,7 @@ import io.legado.app.ui.book.read.config.ReadStyleDialog
 import io.legado.app.ui.book.read.config.TipConfigDialog.Companion.TIP_COLOR
 import io.legado.app.ui.book.read.config.TipConfigDialog.Companion.TIP_DIVIDER_COLOR
 import io.legado.app.ui.book.read.page.ContentTextView
+import io.legado.app.ui.book.review.BookReviewEditActivity
 import io.legado.app.ui.book.read.page.ReadView
 import io.legado.app.ui.book.read.page.delegate.ScrollPageDelegate
 import io.legado.app.ui.book.read.page.entities.PageDirection
@@ -212,6 +213,14 @@ class ReadBookActivity : BaseReadBookActivity(),
                 super.finish()
             } else {
                 ReadBook.loadOrUpContent()
+            }
+        }
+    private val bookReviewEditActivity =
+        registerForActivityResult(StartActivityContract(BookReviewEditActivity::class.java)) {
+            if (it.resultCode == RESULT_OK) {
+                ReadBook.book?.bookUrl?.let { bookUrl ->
+                    ReadBook.book = appDb.bookDao.getBook(bookUrl) ?: ReadBook.book
+                }
             }
         }
     private val selectImageDir = registerForActivityResult(HandleFileContract()) {
@@ -989,6 +998,14 @@ class ReadBookActivity : BaseReadBookActivity(),
         binding.readView.cancelSelect()
         binding.readView.pageDelegate?.isCancel = false
         binding.readView.pageDelegate?.keyTurnPage(direction)
+    }
+
+    override fun openBookReview() {
+        ReadBook.book?.let { book ->
+            bookReviewEditActivity.launch {
+                putExtra("bookUrl", book.bookUrl)
+            }
+        }
     }
 
     override fun upMenuView() {

@@ -252,6 +252,16 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
             false
         }
         var handled = false
+        for (relativePos in 0..2) {
+            if (relativePos > 0 && !callBack.isScroll) break
+            val relativeOffset = relativeOffset(relativePos)
+            if (relativePos > 0 && relativeOffset >= ChapterProvider.visibleHeight) break
+            val page = relativePage(relativePos)
+            if (page.isBookReviewButtonTouched(x, y, relativeOffset)) {
+                callBack.openBookReview()
+                return true
+            }
+        }
         touch(x, y) { _, textPos, textPage, textLine, column ->
             when (column) {
                 is ButtonColumn -> {
@@ -783,5 +793,6 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
         fun onLongScreenshotTouchEvent(event: MotionEvent): Boolean
         fun oldClickImg(src: String): Boolean
         fun clickImg(click: String, src: String)
+        fun openBookReview()
     }
 }

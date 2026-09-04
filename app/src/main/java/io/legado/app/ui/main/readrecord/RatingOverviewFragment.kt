@@ -1,12 +1,15 @@
 package io.legado.app.ui.main.readrecord
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.graphics.Rect
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewConfiguration
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -55,6 +58,9 @@ class RatingOverviewFragment : BaseFragment(R.layout.fragment_rating_overview),
     private val binding by viewBinding(FragmentRatingOverviewBinding::bind)
     private val activityViewModel by activityViewModels<MainViewModel>()
     private val ratings = List(11) { index -> 5f - index * 0.5f }
+    private val ratingFilters by lazy { listOf<Float?>(null) + ratings }
+    private val ratingButtonHorizontalPadding by lazy { 8.dp }
+    private val ratingButtonVerticalPadding by lazy { 4.dp }
     private val bookshelfLayout by lazy { AppConfig.bookshelfLayout }
     private val bookshelfMargin by lazy { AppConfig.bookshelfMargin }
     private val booksAdapter: BaseBooksAdapter<*> by lazy {
@@ -64,8 +70,10 @@ class RatingOverviewFragment : BaseFragment(R.layout.fragment_rating_overview),
             else -> BooksAdapterGrid(requireContext(), this)
         }
     }
-    private var selectedRating = 5f
+    private var selectedRating: Float? = null
+    private var ratingCounts: Map<Float, Int> = emptyMap()
     private var booksFlowJob: Job? = null
+    private var ratingCountsJob: Job? = null
     private var upLastUpdateTimeJob: Job? = null
     private var itemCount = 0
     private var totalRows = 0
@@ -75,16 +83,16 @@ class RatingOverviewFragment : BaseFragment(R.layout.fragment_rating_overview),
         binding.root.setBackgroundColor(requireContext().bottomBackground)
         initRatingButtons()
         initRecyclerView()
+        observeRatingCounts()
         upRecyclerData()
     }
 
     private fun initRatingButtons() {
-        ratings.forEach { rating ->
+        ratingFilters.forEach { rating ->
             val button = LayoutInflater.from(requireContext())
                 .inflate(R.layout.item_fillet_text, binding.llRatingFilters, false) as TextView
-            button.text = ratingLabel(rating)
-            button.background = requireContext().getDrawable(R.drawable.selector_rating_filter_btn_bg)
-            button.isSelected = rating == selectedRating
+            button.stateListAnimator = null
+            button.text = ratingLabelWithCount(rating)
             button.setOnClickListener {
                 if (selectedRating != rating) {
                     selectedRating = rating
@@ -95,18 +103,46 @@ class RatingOverviewFragment : BaseFragment(R.layout.fragment_rating_overview),
             }
             binding.llRatingFilters.addView(button)
         }
+        upRatingButtonState()
     }
 
     private fun upRatingButtonState() {
         for (i in 0 until binding.llRatingFilters.childCount) {
-            val child = binding.llRatingFilters.getChildAt(i)
-            child.isSelected = ratings.getOrNull(i) == selectedRating
+            val child = binding.llRatingFilters.getChildAt(i) as? TextView ?: continue
+            val rating = ratingFilters.getOrNull(i)
+            child.text = ratingLabelWithCount(rating)
+            child.isSelected = rating == selectedRating
+            bindRatingButtonStyle(child, child.isSelected)
             if (child.isSelected) {
                 binding.hsvRatingFilters.post {
                     binding.hsvRatingFilters.smoothScrollTo(child.left - 8.dp, 0)
                 }
             }
         }
+    }
+
+    private fun bindRatingButtonStyle(button: TextView, selected: Boolean) {
+        button.setTextColor(
+            if (selected) {
+                Color.WHITE
+            } else {
+                ContextCompat.getColor(requireContext(), R.color.primaryText)
+            }
+        )
+        button.background = if (selected) {
+            GradientDrawable().apply {
+                cornerRadius = 16.dp.toFloat()
+                setColor(accentColor)
+            }
+        } else {
+            requireContext().getDrawable(R.drawable.selector_rating_filter_btn_bg)
+        }
+        button.setPadding(
+            ratingButtonHorizontalPadding,
+            ratingButtonVerticalPadding,
+            ratingButtonHorizontalPadding,
+            ratingButtonVerticalPadding
+        )
     }
 
     private fun initRecyclerView() {
@@ -181,7 +217,10 @@ class RatingOverviewFragment : BaseFragment(R.layout.fragment_rating_overview),
     private fun upRecyclerData() {
         booksFlowJob?.cancel()
         booksFlowJob = viewLifecycleOwner.lifecycleScope.launch {
-            appDb.bookDao.flowShelfByRating(selectedRating)
+            val booksFlow = selectedRating?.let {
+                appDb.bookDao.flowShelfByRating(it)
+            } ?: appDb.bookDao.flowShelfRatedBooks()
+            booksFlow
                 .flowWithLifecycleAndDatabaseChangeFirst(
                     viewLifecycleOwner.lifecycle,
                     Lifecycle.State.RESUMED,
@@ -208,6 +247,23 @@ class RatingOverviewFragment : BaseFragment(R.layout.fragment_rating_overview),
         }
     }
 
+    private fun observeRatingCounts() {
+        ratingCountsJob?.cancel()
+        ratingCountsJob = viewLifecycleOwner.lifecycleScope.launch {
+            appDb.bookDao.flowShelfRatingCounts()
+                .flowWithLifecycleAndDatabaseChangeFirst(
+                    viewLifecycleOwner.lifecycle,
+                    Lifecycle.State.RESUMED,
+                    AppDatabase.BOOK_TABLE_NAME
+                ).catch {
+                    AppLog.put("评分计数更新出错", it)
+                }.conflate().flowOn(Dispatchers.Default).collect { list ->
+                    ratingCounts = list.associate { it.rating to it.count }
+                    upRatingButtonState()
+                }
+        }
+    }
+
     private fun startLastUpdateTimeJob() {
         upLastUpdateTimeJob?.cancel()
         if (!AppConfig.showLastUpdateTime || bookshelfLayout >= 2) {
@@ -221,13 +277,22 @@ class RatingOverviewFragment : BaseFragment(R.layout.fragment_rating_overview),
         }
     }
 
-    private fun ratingLabel(rating: Float): String {
-        return "★${String.format(Locale.US, "%.1f", rating)}"
+    private fun ratingLabelWithCount(rating: Float?): String {
+        val count = if (rating == null) {
+            ratingCounts.filterKeys { it > 0f }.values.sum()
+        } else {
+            ratingCounts[rating] ?: 0
+        }
+        val label = rating?.let {
+            "★${String.format(Locale.US, "%.1f", it)}"
+        } ?: getString(R.string.all)
+        return "$label ($count)"
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         booksFlowJob?.cancel()
+        ratingCountsJob?.cancel()
         upLastUpdateTimeJob?.cancel()
         binding.rvBookshelf.setItemViewCacheSize(0)
         binding.rvBookshelf.adapter = null

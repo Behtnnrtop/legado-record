@@ -80,6 +80,9 @@
     <string name="read_record_hour_histogram_y_axis">Count</string>
     <string name="read_record_hour_histogram_empty">No reading data this week</string>
     <string name="rating_overview">Rating overview</string>
+    <string name="book_review_overview">Review overview</string>
+    <string name="book_review_detail">Review detail</string>
+    <string name="book_reviews_empty">No book reviews</string>
     <string name="rating_books_empty">No books with this rating</string>
     <string name="last_read">Last reading</string>
     <string name="update_log">What\'s new</string>
@@ -998,6 +1001,13 @@
     <string name="book_rating_score">%1$.1f</string>
     <string name="book_rating_updated">Rated %1$.1f</string>
     <string name="book_rating_cleared">Rating cleared</string>
+    <string name="book_review">Book review</string>
+    <string name="book_review_title">Review:</string>
+    <string name="book_review_edit">Edit review</string>
+    <string name="book_review_empty">No review</string>
+    <string name="book_review_created">Created %1$s</string>
+    <string name="add_book_review">Add review</string>
+    <string name="book_review_page_tip">End of book</string>
     <string name="read_data">Read data:</string>
     <string name="read_duration">Reading time</string>
     <string name="read_day_count">Reading days</string>
