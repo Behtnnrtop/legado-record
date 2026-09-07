@@ -72,6 +72,7 @@ object Backup {
             "rssStar.json",
             "replaceRule.json",
             "readRecord.json",
+            "readRecordLegacyMappings.json",
             "bookReadSessions.json",
             "searchHistory.json",
             "sourceSub.json",
@@ -146,6 +147,7 @@ object Backup {
         writeListToJson(appDb.rssStarDao.all, "rssStar.json", backupPath)
         writeListToJson(appDb.replaceRuleDao.all, "replaceRule.json", backupPath)
         writeListToJson(appDb.readRecordDao.all, "readRecord.json", backupPath)
+        writeListToJson(appDb.readRecordLegacyMappingDao.all, "readRecordLegacyMappings.json", backupPath)
         writeListToJson(appDb.bookReadSessionDao.all, "bookReadSessions.json", backupPath)
         writeListToJson(appDb.searchKeywordDao.all, "searchHistory.json", backupPath)
         writeListToJson(appDb.ruleSubDao.all, "sourceSub.json", backupPath)

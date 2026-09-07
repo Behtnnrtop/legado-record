@@ -19,6 +19,7 @@ import io.legado.app.data.entities.DictRule
 import io.legado.app.data.entities.HttpTTS
 import io.legado.app.data.entities.KeyboardAssist
 import io.legado.app.data.entities.ReadRecord
+import io.legado.app.data.entities.ReadRecordLegacyMapping
 import io.legado.app.data.entities.ReplaceRule
 import io.legado.app.data.entities.RssSource
 import io.legado.app.data.entities.RssStar
@@ -193,6 +194,11 @@ object Restore {
                         appDb.readRecordDao.insert(readRecord)
                     }
                 }
+            }
+        }
+        fileToListT<ReadRecordLegacyMapping>(path, "readRecordLegacyMappings.json")?.let {
+            it.forEach { mapping ->
+                appDb.readRecordLegacyMappingDao.insert(mapping)
             }
         }
         fileToListT<BookReadSession>(path, "bookReadSessions.json")?.let {
