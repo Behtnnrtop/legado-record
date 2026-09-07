@@ -136,11 +136,7 @@ jobs:
           echo "body=$CONTENT_JSON" >> $GITHUB_OUTPUT
       - id: set-matrix
         run: |
-          if [ "${{ steps.updateLog.outputs.updated }}" == "yes" ]; then
-            echo 'build_matrix={"product":["app"],"type":["release","releaseS"]}' >> $GITHUB_OUTPUT
-          else
-            echo 'build_matrix={"product":["app"],"type":["release"]}' >> $GITHUB_OUTPUT
-          fi
+          echo 'build_matrix={"product":["app"],"type":["releaseR"]}' >> $GITHUB_OUTPUT
 
   build:
     needs: prepare
@@ -223,13 +219,7 @@ jobs:
 
       - name: Build With Gradle
         run: |
-          if [ "${{ env.type }}" == 'release' ]; then
-            typeName="原包名"
-          else
-            typeName="共存"
-            sed "s/'.release'/'.releaseS'/" $GITHUB_WORKSPACE/app/build.gradle  -i
-            # sed 's/.release/.releaseS/'     $GITHUB_WORKSPACE/app/google-services.json -i
-          fi
+          typeName="releaseR"
           echo "统一版本号"
           sed "/def version/c def version = \"${{ env.VERSION }}\"" $GITHUB_WORKSPACE/app/build.gradle  -i
           echo "开始${{ env.product }}$typeName构建"
@@ -238,11 +228,7 @@ jobs:
           echo "修改APK文件名"
           mkdir -p ${{ github.workspace }}/apk/
           for file in `ls ${{ github.workspace }}/app/build/outputs/apk/*/*/*.apk`; do
-            if [ "${{ env.type }}" == 'release' ]; then
-              mv "$file" ${{ github.workspace }}/apk/legador_测试版_${{ env.VERSIONL }}_$typeName.apk
-            else
-              mv "$file" ${{ github.workspace }}/apk/legador_正式版_${{ env.VERSIONL }}_$typeName.apk
-            fi
+            mv "$file" ${{ github.workspace }}/apk/legador_beta_${{ env.VERSIONL }}_$typeName.apk
           done
           echo "移动mapping文件"
           mkdir -p ${{ github.workspace }}/mapping/
@@ -311,14 +297,6 @@ jobs:
         run: |
           mv */*.apk .
           rm -rf */
-
-          for file in `ls *.apk`; do
-            if [[ "$file" == *原包名* ]]; then
-              mv "$file" $(echo $file | sed -e s/原包名/release/ -e s/测试版/beta/)
-            else
-              mv "$file" $(echo $file | sed -e s/共存/releaseS/ -e s/正式版/plus/)
-            fi
-          done
 
       - name: Publish Official Release
         if: needs.prepare.outputs.updateLog_updated == 'yes'
@@ -400,22 +378,7 @@ jobs:
         run: |
           mv */*.apk .
           rm -rf */
-          has_plus=false
-          for file in `ls *.apk`; do
-            if [[ "$file" == *原包名* ]]; then
-              mv "$file" $(echo $file | sed s/原包名/beta/)
-            else
-              mv "$file" $(echo $file | sed s/共存/plus/)
-              has_plus=true
-            fi
-          done
-          tags=""
-          if [ "$has_plus" = true ]; then
-            tags="#beta #plus"
-          else
-            tags="#beta"
-          fi
-          echo "TAGS=$tags" >> $GITHUB_OUTPUT
+          echo "TAGS=#beta #releaseR" >> $GITHUB_OUTPUT
       - name: Post to channel
         continue-on-error: true
         uses: xireiki/channel-post@v1
@@ -442,14 +405,6 @@ jobs:
         run: |
           mv */*.apk .
           rm -rf */
-
-          for file in `ls *.apk`; do
-            if [[ "$file" == *原包名* ]]; then
-              mv "$file" $(echo $file | sed s/原包名/release/)
-            else
-              mv "$file" $(echo $file | sed s/共存/releaseS/)
-            fi
-          done
 
       - name: Upload to Gitee Release
         continue-on-error: true
@@ -556,17 +511,17 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: legador.app.releaseS
-          path: ./apk-releaseS
+          name: legador.app.releaseR
+          path: ./apk-releaseR
 
-      - name: Check releaseS APK exists
+      - name: Check releaseR APK exists
         id: check-apk
         run: |
-          if ls ./apk-releaseS/*.apk 1> /dev/null 2>&1; then
-            echo "releaseS APK found"
+          if ls ./apk-releaseR/*.apk 1> /dev/null 2>&1; then
+            echo "releaseR APK found"
             echo "apk_exists=true" >> $GITHUB_OUTPUT
           else
-            echo "releaseS APK not found"
+            echo "releaseR APK not found"
             echo "apk_exists=false" >> $GITHUB_OUTPUT
           fi
 
@@ -581,8 +536,8 @@ jobs:
           git clone https://${{ secrets.S_GITHUB_TOKEN }}@github.com/Behtnnrtop/legado-record.git link-E-repo
           # 创建目录（如果不存在）
           mkdir -p link-E-repo/release-apk
-          # 复制releaseS APK文件并重命名
-          cp ./apk-releaseS/*.apk link-E-repo/release-apk/legador_正式版.apk
+          # 复制releaseR APK文件并重命名
+          cp ./apk-releaseR/*.apk link-E-repo/release-apk/legador_正式版.apk
           # 提交更改
           cd link-E-repo
           git add release-apk/legador_正式版.apk
