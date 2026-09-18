@@ -81,6 +81,10 @@
         <attr name="isBottomBackground" />
     </declare-styleable>
 
+    <declare-styleable name="BookRatingBar">
+        <attr name="ratingIndicator" format="boolean" />
+    </declare-styleable>
+
     <declare-styleable name="SmoothCheckBox">
         <attr name="duration" format="integer" />
         <attr name="stroke_width" format="dimension" />

@@ -5,6 +5,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.addTextChangedListener
 import io.legado.app.R
 import io.legado.app.base.VMBaseActivity
 import io.legado.app.data.entities.Book
@@ -20,6 +21,8 @@ class BookReviewEditActivity :
     override val binding by viewBinding(ActivityBookReviewEditBinding::inflate)
     override val viewModel by viewModels<BookReviewEditViewModel>()
 
+    private var bindingBookData = false
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         binding.root.setOnApplyWindowInsetsListenerCompat { view, windowInsets ->
             val typeMask = WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime()
@@ -28,6 +31,12 @@ class BookReviewEditActivity :
             windowInsets
         }
         viewModel.bookData.observe(this) { upView(it) }
+        binding.bookRatingBar.onRatingChanged = {
+            updateReviewDraft()
+        }
+        binding.tieBookReview.addTextChangedListener {
+            updateReviewDraft()
+        }
         intent.getStringExtra("bookUrl")?.let {
             viewModel.loadBook(it)
         } ?: run {
@@ -49,10 +58,15 @@ class BookReviewEditActivity :
     }
 
     private fun upView(book: Book) = binding.run {
-        tvBookName.text = book.name
-        tvAuthor.text = getString(R.string.author_show, book.getRealAuthor())
-        bookRatingBar.rating = book.rating
-        tieBookReview.setText(book.review)
+        bindingBookData = true
+        try {
+            tvBookName.text = book.name
+            tvAuthor.text = getString(R.string.author_show, book.getRealAuthor())
+            bookRatingBar.rating = viewModel.getEditingRating(book)
+            tieBookReview.setText(viewModel.getEditingReview(book))
+        } finally {
+            bindingBookData = false
+        }
     }
 
     private fun saveData() = binding.run {
@@ -60,8 +74,18 @@ class BookReviewEditActivity :
             bookRatingBar.rating,
             tieBookReview.text?.toString().orEmpty()
         ) {
+            viewModel.clearDraft()
             setResult(RESULT_OK)
             finish()
+        }
+    }
+
+    private fun updateReviewDraft() = binding.run {
+        if (!bindingBookData) {
+            viewModel.updateDraft(
+                bookRatingBar.rating,
+                tieBookReview.text?.toString().orEmpty()
+            )
         }
     }
 

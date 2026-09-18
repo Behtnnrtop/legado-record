@@ -10,6 +10,7 @@ import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.use
 import io.legado.app.R
 import kotlin.math.cos
 import kotlin.math.min
@@ -35,6 +36,12 @@ class BookRatingBar @JvmOverloads constructor(
 
     var onRatingChanged: ((Float) -> Unit)? = null
 
+    var ratingIndicator: Boolean = false
+        set(value) {
+            field = value
+            updateInteractionState()
+        }
+
     private val starSize = 19f.dp()
     private val starTouchWidth = 24f.dp()
     private val minTouchHeight = 36f.dp()
@@ -56,8 +63,9 @@ class BookRatingBar @JvmOverloads constructor(
     private val starBounds = RectF()
 
     init {
-        isClickable = true
-        isFocusable = true
+        context.obtainStyledAttributes(attrs, R.styleable.BookRatingBar).use {
+            ratingIndicator = it.getBoolean(R.styleable.BookRatingBar_ratingIndicator, false)
+        }
         contentDescription = ratingDescription()
     }
 
@@ -96,8 +104,13 @@ class BookRatingBar @JvmOverloads constructor(
         canvas.drawText(ratingText(), textX, textY, textPaint)
     }
 
+    override fun getBaseline(): Int {
+        val centerY = paddingTop + (height - paddingTop - paddingBottom) / 2f
+        return (centerY - (textPaint.descent() + textPaint.ascent()) / 2f).roundToInt()
+    }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!isEnabled) return super.onTouchEvent(event)
+        if (ratingIndicator || !isEnabled) return false
         when (event.actionMasked) {
             MotionEvent.ACTION_UP -> {
                 val newRating = ratingFromX(event.x)
@@ -109,6 +122,11 @@ class BookRatingBar @JvmOverloads constructor(
             }
         }
         return true
+    }
+
+    private fun updateInteractionState() {
+        isClickable = !ratingIndicator
+        isFocusable = !ratingIndicator
     }
 
     override fun performClick(): Boolean {

@@ -9,6 +9,7 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import io.legado.app.R
 import io.legado.app.data.entities.BookReadDayRecord
+import io.legado.app.lib.theme.accentColor
 import io.legado.app.utils.dpToPx
 import java.time.LocalDate
 import java.time.YearMonth
@@ -80,7 +81,7 @@ class BookReadCalendarView @JvmOverloads constructor(
         val primaryText = ContextCompat.getColor(context, R.color.tv_text_summary)
         val summaryText = ContextCompat.getColor(context, R.color.tv_text_summary)
         val labelTextColor = ContextCompat.getColor(context, android.R.color.white)
-        val calendarAccent = ContextCompat.getColor(context, R.color.read_calendar_accent)
+        val calendarAccent = context.accentColor
         textPaint.color = primaryText
         smallTextPaint.color = summaryText
         labelTextPaint.color = labelTextColor

@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.script.rhino.runScriptWithContext
+import io.legado.app.App
 import io.legado.app.R
 import io.legado.app.base.BaseViewModel
 import io.legado.app.constant.AppLog
@@ -456,7 +457,7 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
         book.rating = normalized
         book.ratingUpdateTime = updateTime
         bookData.postValue(book)
-        execute {
+        execute(scope = App.dbScope) {
             if (!inBookshelf) {
                 book.addType(BookType.notShelf)
             }

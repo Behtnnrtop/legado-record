@@ -14,6 +14,9 @@ class BookReviewEditViewModel(application: Application) : BaseViewModel(applicat
 
     var book: Book? = null
     val bookData = MutableLiveData<Book>()
+    private var draftRating: Float = 0f
+    private var draftReview: String = ""
+    private var hasDraft = false
 
     fun loadBook(bookUrl: String) {
         execute {
@@ -26,17 +29,42 @@ class BookReviewEditViewModel(application: Application) : BaseViewModel(applicat
         }
     }
 
-    fun saveReview(rating: Float, review: String, success: (() -> Unit)?) {
+    fun updateDraft(rating: Float, review: String) {
+        draftRating = normalizeRating(rating)
+        draftReview = review
+        hasDraft = true
+    }
+
+    fun clearDraft() {
+        draftRating = 0f
+        draftReview = ""
+        hasDraft = false
+    }
+
+    fun getEditingRating(book: Book): Float {
+        return if (hasDraft) draftRating else book.rating
+    }
+
+    fun getEditingReview(book: Book): String {
+        return if (hasDraft) draftReview else book.review.orEmpty()
+    }
+
+    fun saveReview(rating: Float, review: String, success: (() -> Unit)? = null) {
         val book = book ?: return
         val normalizedRating = normalizeRating(rating)
         val normalizedReview = review.trim().ifBlank { null }
         val now = System.currentTimeMillis()
+        val ratingChanged = normalizedRating != book.rating
         val ratingUpdateTime = if (normalizedRating != book.rating) {
             now
         } else {
             book.ratingUpdateTime
         }
         val reviewChanged = normalizedReview != book.review
+        if (!ratingChanged && !reviewChanged) {
+            success?.invoke()
+            return
+        }
         val reviewCreateTime = when {
             normalizedReview == null -> 0L
             book.reviewCreateTime > 0L -> book.reviewCreateTime

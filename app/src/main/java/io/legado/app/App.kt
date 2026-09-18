@@ -55,6 +55,9 @@ import io.legado.app.utils.LogUtils
 import io.legado.app.utils.defaultSharedPreferences
 import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.isDebuggable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.chromium.base.ThreadUtils
 import splitties.init.appCtx
@@ -251,6 +254,8 @@ class App : Application() {
     }
 
     companion object {
+        val dbScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
         init {
             if (BuildConfig.DEBUG) {
                 System.setProperty("kotlinx.coroutines.debug", "on")
